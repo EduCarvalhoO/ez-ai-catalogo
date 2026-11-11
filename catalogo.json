@@ -1,0 +1,15 @@
+{
+  "versaoCatalogo": 0,
+  "pacotes": [
+    {
+      "nome": "educarvalhoo/workflow-feature",
+      "descricao": "Workflow de feature com gates: ficha, revisão, execução e entrega, com agentes (cartógrafo, arquiteto, implementador, revisor) e skills de revisão de PR e depuração.",
+      "repositorio": "https://github.com/educarvalhoo/workflow-feature",
+      "etiquetas": [
+        "workflow",
+        "revisao",
+        "agentes"
+      ]
+    }
+  ]
+}

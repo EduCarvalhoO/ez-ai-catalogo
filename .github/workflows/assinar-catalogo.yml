@@ -1,0 +1,34 @@
+# Assina o catalogo.json (bytes exatos do arquivo no Git) com Sigstore keyless quando uma tag v* e criada.
+# Guia do catalogo no ez-ai. Actions fixadas por SHA de commit.
+name: assinar-catalogo
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  assinar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # commitar o bundle e mover a tag para esse commit
+      id-token: write   # token OIDC: vira o certificado Sigstore
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+      - name: Calcular o hash do catalogo
+        run: |
+          set -euo pipefail
+          printf '%s' "sha256:$(sha256sum catalogo.json | cut -d' ' -f1)" > hash.txt
+          cat hash.txt
+      - name: Assinar o hash (keyless)
+        run: cosign sign-blob --yes --bundle harness-pacote.sigstore.json hash.txt
+      - name: Publicar o bundle no commit da tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add harness-pacote.sigstore.json
+          git commit -m "chore: bundle de assinatura de ${GITHUB_REF_NAME}"
+          git tag -f "${GITHUB_REF_NAME}"
+          git push --force origin "refs/tags/${GITHUB_REF_NAME}"
